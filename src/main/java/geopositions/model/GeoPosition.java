@@ -57,6 +57,12 @@ public class GeoPosition {
 	public void setInfos(String infos) {
 		this.infos = infos;
 	}
+
+	@Override
+	public String toString() {
+		return "GeoPosition [id=" + id + ", longitude=" + longitude + ", lattitude=" + lattitude + ", date=" + date
+				+ ", infos=" + infos + "]";
+	}
 	
 	
 	
