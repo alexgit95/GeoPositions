@@ -53,9 +53,9 @@ public class MainVerticle extends AbstractVerticle {
 		router.get("/positions/month/:year/:month").handler(this::getPositionsByMonth);
 		router.get("/positions/near/:lattitude/:longitude").handler(this::getPositionsByPosition);
 
-		vertx.createHttpServer().requestHandler(router).listen(8888, res -> {
+		vertx.createHttpServer().requestHandler(router).listen(8899, res -> {
 			if (res.succeeded()) {
-				log.info("Serveur demarre sur le port " + 8888);
+				log.info("Serveur demarre sur le port " + 8899);
 				startPromise.complete();
 			} else {
 				startPromise.fail(res.cause());

@@ -9,6 +9,7 @@ COPY --from=builder /src/target /apps
 ENV AWS_CREDENTIAL_PROFILES_FILE=/credentials/credentials.aws
 WORKDIR /apps
 EXPOSE 8899
-ENTRYPOINT ["java", "-jar", "geopositions-1.0.0-SNAPSHOT-fat.jar"]
+ENTRYPOINT ["java", "-Xmx50m","-jar", "geopositions-1.0.0-SNAPSHOT-fat.jar"]
+
 
 

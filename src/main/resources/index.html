@@ -14,185 +14,41 @@
   <body>
     <h1>Mes Positions</h1>
 	
-	<script>
-	var adresserserveur="";
-	function getAll(){
-	
-	
-		$.ajax({
-			url : adresserserveur+"/all",
-			type : 'GET',
-			dataType : 'json', 
-			success : function(data,textStatus ){ 
-			var content='<table class="table table-borderless ">';
-			content+='<thead><tr><th scope="col">Nom</th><th scope="col">T&eacute;l&eacute;phone</th><th scope="col">Serveur</th><th scope="col">Glacier</th><th scope="col">Hubic</th><thead><tbody>';
-			for(var i=0;i<data.length;i++){
-				content+=generateLine(data[i]);
-			}
-			content+='</tbody></table>';
-			
-			document.getElementById("result").innerHTML=content;
-			},
-			fail: function(xhr, textStatus, errorThrown){
-				alert('request failed');
-			}
-	});
+	<p>Click the button to get your coordinates.</p>
+
+<button onclick="getLocation()">Recuperer infos</button>
+
+<p id="demo"></p>
+
+<script>
+var x = document.getElementById("demo");
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else { 
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
 }
 
-
-function generateLine(photo){
-	if(photo.isGlacier&&photo.isServeur){
-		return '<tr class="table-success"><th scope="row">'+photo.nom+'</th>'+affichageTelephone(photo)+affichageServeur(photo)+affichageGlacier(photo)+affichageHubic(photo)+'</tr>';
-	}
-	
-	if(photo.isServeur&&photo.isHubic&&!photo.isGlacier){
-		return '<tr class="table-info"><th scope="row">'+photo.nom+'</th>'+affichageTelephone(photo)+affichageServeur(photo)+affichageGlacier(photo)+affichageHubic(photo)+'</tr>';
-	}
-	
-	if(photo.isServeur&&!photo.isHubic&&!photo.isGlacier){
-		return '<tr class="table-warning"><th scope="row">'+photo.nom+'</th>'+affichageTelephone(photo)+affichageServeur(photo)+affichageGlacier(photo)+affichageHubic(photo)+'</tr>';
-	}
- 
-	 if(!photo.isServeur){
-		return '<tr class="table-danger"><th scope="row">'+photo.nom+'</th>'+affichageTelephone(photo)+affichageServeur(photo)+affichageGlacier(photo)+affichageHubic(photo)+'</tr>';
-	 }
- 
- return '<tr class="table-danger"><th scope="row">'+photo.nom+'</th>'+affichageTelephone(photo)+affichageServeur(photo)+affichageGlacier(photo)+affichageHubic(photo)+'</tr>';
- 
- 
- 
-}
-
-
-function affichageTelephone(data){
-	if(data.isTelephone){
-		return "<td>"+data.isTelephone+"</td>";
-	}else{
-		return '<td>'+data.isTelephone+' <button type="button" class="btn btn-primary" onclick="marquerTelephone(\''+data.id+'\')">Sur le Telephone !</button></td>"';
-	}
-}
-
-function affichageServeur(data){
-	if(data.isServeur){
-		return "<td>"+data.isServeur+"</td>";
-	}else{
-		return '<td>'+data.isServeur+' <button type="button" class="btn btn-primary" onclick="marquerServeur(\''+data.id+'\')">Sur le serveur !</button></td>"';
-	}
-}
-
-function affichageGlacier(data){
-	if(data.isGlacier){
-		return "<td>"+data.isGlacier+"</td>";
-	}else{
-		return '<td>'+data.isGlacier+' <button type="button" class="btn btn-primary" onclick="marquerGlacier(\''+data.id+'\')">Sur le Glacier !</button></td>"';
-	}
-}
-
-function affichageHubic(data){
-	if(data.isHubic){
-		return "<td>"+data.isHubic+"</td>";
-	}else{
-		return '<td>'+data.isHubic+' <button type="button" class="btn btn-primary" onclick="marquerHubic(\''+data.id+'\')">Sur Hubic !</button></td>"';
-	}
-}
-
-
-
-function marquerServeur(id){
+function showPosition(position) {
+  x.innerHTML = "Latitude: " + position.coords.latitude + 
+  "<br>Longitude: " + position.coords.longitude;
 
 $.ajax({
-			url : adresserserveur+"/serveur?id="+id+"&isserveur=true",
-			type : 'GET',
+			url : "/positions/addnow/"+position.coords.latitude+"/"+position.coords.longitude,
+			type : 'POST',
 			dataType : 'json', 
 			success : function(data,textStatus ){ 
-				location.reload();
+			alert("ok");
 			},
 			fail: function(xhr, textStatus, errorThrown){
 				alert('request failed');
 			}
 	});
 }
+</script>
 
-function marquerHubic(id){
-
-$.ajax({
-			url : adresserserveur+"/hubic?id="+id+"&ishubic=true",
-			type : 'GET',
-			dataType : 'json', 
-			success : function(data,textStatus ){ 
-				location.reload();
-			},
-			fail: function(xhr, textStatus, errorThrown){
-				alert('request failed');
-			}
-	});
-}
-
-function marquerGlacier(id){
-
-$.ajax({
-			url : adresserserveur+"/glacier?id="+id+"&isglacier=true",
-			type : 'GET',
-			dataType : 'json', 
-			success : function(data,textStatus ){ 
-				location.reload();
-			},
-			fail: function(xhr, textStatus, errorThrown){
-				alert('request failed');
-			}
-	});
-}
-
-function marquerTelephone(id){
-
-$.ajax({
-			url : adresserserveur+"/telephone?id="+id+"&istel=true",
-			type : 'GET',
-			dataType : 'json', 
-			success : function(data,textStatus ){ 
-				location.reload();
-			},
-			fail: function(xhr, textStatus, errorThrown){
-				alert('request failed');
-			}
-	});
-}
-
-function addNewElem(){
-	var nomrep=document.getElementById("nomrep").value;
-	var annee=document.getElementById("anneerep").value;
-	
-	$.ajax({
-			url : adresserserveur+"/create?nomrepo="+nomrep+"&annee="+annee,
-			type : 'GET',
-			dataType : 'json', 
-			success : function(data,textStatus ){ 
-				location.reload();
-			},
-			fail: function(xhr, textStatus, errorThrown){
-				alert('request failed');
-			}
-	});
-}
-	</script>
-	
-	
-	
-
-<div id="result"></div>
-
-
-
-  <div class="form-group">
-    <label for="exampleInputEmail1">Nom du repertoire</label>
-    <input type="text" class="form-control" id="nomrep"  >
-  </div>
-  <div class="form-group">
-    <label for="exampleInputPassword1">Annee</label>
-    <input type="texte" class="form-control" id="anneerep" placeholder="YYYY">
-  </div>
-  
-  <button  class="btn btn-primary" onclick="addNewElem()">Ajouter</button>
 
 
     <!-- Optional JavaScript -->
@@ -200,8 +56,6 @@ function addNewElem(){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   
-  <script>
-  getAll();
-  </script>
+ 
   </body>
 </html>
