@@ -50,23 +50,23 @@ Recupere toutes les potions à moins de 50km
 
 ## Comment demarrer?
 
-###Prerequis
+### Prerequis
 
-Pour generer le certificat dans /c/Users/<USER WINDOWS>/dev/certificats, remplacer MYDN par votre DN, et MYPASSWORD pour le password
+Pour generer le certificat dans  ``` /c/Users/<USER WINDOWS>/dev/certificats ```, remplacer MYDN par votre DN, et MYPASSWORD pour le password
 
 ```
 keytool -genkeypair -alias simple-cert -keyalg RSA -keysize 2048 -keystore letsencrypt.jks -dname "CN=MYDN.FR" -storepass <MYPASSWORD>
 ```
 
-Creer un fichier properties /c/Users/<USER WINDOWS>/dev/properties/props-geopositions.properties
+Creer un fichier properties ``` /c/Users/<USER WINDOWS>/dev/properties/props-geopositions.properties ```
 
-avec le contenu, remplacer <MYPASSWORD> par le mot de passe utilisé lors de la génération de la clé :
+avec le contenu, remplacer ``` <MYPASSWORD> ``` par le mot de passe utilisé lors de la génération de la clé :
 
 ```
 keystorepassword=<MYPASSWORD>
 ```
 
-###Construction
+### Construction	
 
 
 Construire :
