@@ -48,6 +48,11 @@
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-config</artifactId>
+			<version>${vertx.version}</version>
+		</dependency>
 	
 
 <dependency>

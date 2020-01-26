@@ -13,3 +13,4 @@ ENTRYPOINT ["java", "-Xmx50m","-jar", "geopositions-1.0.0-SNAPSHOT-fat.jar"]
 
 
 
+
