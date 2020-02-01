@@ -1,26 +1,18 @@
 package geopositions.api;
 
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-
 import geopositions.model.GeoPosition;
 import geopositions.services.DaoServices;
 import geopositions.services.impl.DaoServicesImpl;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -28,18 +20,14 @@ import io.vertx.ext.web.handler.CorsHandler;
 public class MainVerticle extends AbstractVerticle {
 
 	private DaoServices daoServices;
-	private String contentClient;
 	private final Logger log = LoggerFactory.getLogger(MainVerticle.class);
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-	private JsonObject config;
+	
 
 	@Override
 	public void start(Promise<Void> startPromise) throws Exception {
 
 		daoServices = new DaoServicesImpl();
-		log.info("Chargement du fichier index.html");
-		contentClient = IOUtils.toString((getClass().getResourceAsStream("/index.html")), Charset.forName("UTF-8"));
-		log.info("Fin du chargement du fichier index.html");
 		final Router router = Router.router(vertx);
 
 		router.route()
@@ -51,42 +39,19 @@ public class MainVerticle extends AbstractVerticle {
 		router.post("/positions/addnow/:lattitude/:longitude").handler(this::createPos);
 		router.post("/positions/addnow/:lattitude/:longitude/:date").handler(this::createPosWithDate);
 		router.get("/positions/").handler(this::getAll);
-		router.get("/").handler(this::generateHtml);
 		router.get("/positions/year/:year").handler(this::getPositionsByYear);
 		router.get("/positions/month/:year/:month").handler(this::getPositionsByMonth);
 		router.get("/positions/near/:lattitude/:longitude").handler(this::getPositionsByPosition);
 
-		
-
-		ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("properties")
-				.setConfig(new JsonObject().put("path", "/properties/props-geopositions.properties"));
-
-		ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(fileStore);
-
-		ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
-		retriever.getConfig(ar -> {
-
-			if (ar.failed()) {
-				log.error("Erreur lors du chargement du fichier config");
+		vertx.createHttpServer().requestHandler(router).listen(8899, res -> {
+			if (res.succeeded()) {
+				log.info("Serveur demarre sur le port " + 8899);
+				startPromise.complete();
 			} else {
-				config = ar.result();
-				log.info("Configuration chargee avec succes");
-				String keystorePassword = config.getString("keystorepassword");
-				log.info("Keystore Password :"+keystorePassword);
-				HttpServerOptions keyStoreOptions = new HttpServerOptions().setSsl(true)
-						.setKeyStoreOptions(new JksOptions().setPath("/certificats/letsencrypt.jks").setPassword(keystorePassword));
-				log.info("Keystore charge avec succes");
-				vertx.createHttpServer(keyStoreOptions).requestHandler(router).listen(8899, res -> {
-					if (res.succeeded()) {
-						log.info("Serveur demarre sur le port " + 8899);
-						startPromise.complete();
-					} else {
-						startPromise.fail(res.cause());
-					}
-				});
-
+				startPromise.fail(res.cause());
 			}
 		});
+
 	}
 
 	private void createPos(RoutingContext ctx) {
@@ -125,9 +90,13 @@ public class MainVerticle extends AbstractVerticle {
 	}
 
 	private void getPositionsByYear(RoutingContext ctx) {
-		List<GeoPosition> positionsByYear = daoServices
-				.getPositionsByYear(Integer.parseInt(ctx.request().getParam("year")));
-		getJSONResponse(ctx).end(new JsonObject().put("result", positionsByYear).encodePrettily());
+		try {
+			List<GeoPosition> positionsByYear = daoServices
+					.getPositionsByYear(Integer.parseInt(ctx.request().getParam("year")));
+			getJSONResponse(ctx).end(new JsonObject().put("result", positionsByYear).encodePrettily());
+		} catch (Exception e) {
+			log.error(e);
+		}
 
 	}
 
@@ -160,8 +129,6 @@ public class MainVerticle extends AbstractVerticle {
 		return ctx.response().putHeader("Content-Type", "application/json");
 	}
 
-	private void generateHtml(RoutingContext ctx) {
-		ctx.response().putHeader("content-type", "text/html").end(contentClient);
-	}
+	
 
 }
