@@ -42,6 +42,7 @@ public class MainVerticle extends AbstractVerticle {
 		router.get("/positions/year/:year").handler(this::getPositionsByYear);
 		router.get("/positions/month/:year/:month").handler(this::getPositionsByMonth);
 		router.get("/positions/near/:lattitude/:longitude").handler(this::getPositionsByPosition);
+		router.get("/positions/ip").handler(this::returnIP);
 
 		vertx.createHttpServer().requestHandler(router).listen(8899, res -> {
 			if (res.succeeded()) {
@@ -52,6 +53,12 @@ public class MainVerticle extends AbstractVerticle {
 			}
 		});
 
+	}
+	
+	private void returnIP(RoutingContext ctx) {
+		getJSONResponse(ctx).end(new JsonObject().put("status", "ok").put("msg", ctx.request().remoteAddress().toString()).encodePrettily());
+
+		
 	}
 
 	private void createPos(RoutingContext ctx) {
